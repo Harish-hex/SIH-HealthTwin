@@ -4,8 +4,9 @@ services:
     name: health-monitoring-api
     env: python
     plan: starter
-    buildCommand: cd "Digital Health Twin/backend" && pip install -r requirements.txt
-    startCommand: cd "Digital Health Twin/backend" && gunicorn --bind 0.0.0.0:$PORT app:app
+    rootDir: Digital Health Twin/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
       - key: FLASK_ENV
         value: production
@@ -26,8 +27,9 @@ services:
   - type: web
     name: asha-worker-dashboard
     env: static
-    buildCommand: cd AshaWorker_dashboard && npm install && npm run build
-    staticPublishPath: AshaWorker_dashboard/dist
+    rootDir: AshaWorker_dashboard
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
         value: https://health-monitoring-api.onrender.com
@@ -38,8 +40,9 @@ services:
   - type: web
     name: health-worker-dashboard
     env: static
-    buildCommand: cd HealthWorker_dashboard && npm install && npm run build
-    staticPublishPath: HealthWorker_dashboard/dist
+    rootDir: HealthWorker_dashboard
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
         value: https://health-monitoring-api.onrender.com
@@ -50,7 +53,8 @@ services:
   - type: web
     name: health-monitoring-login
     env: static
-    staticPublishPath: Login pg
+    rootDir: Login pg
+    staticPublishPath: ./
     envVars:
       - key: VITE_API_URL
         value: https://health-monitoring-api.onrender.com
