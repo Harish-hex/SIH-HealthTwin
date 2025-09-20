@@ -1,0 +1,8 @@
+# Ignore all Dockerfiles to prevent Render from using Docker
+**/Dockerfile
+**/docker-compose.yml
+**/nginx.conf
+**/.git
+**/node_modules
+**/__pycache__
+**/.DS_Store

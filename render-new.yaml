@@ -5,9 +5,8 @@ services:
     env: python
     plan: starter
     rootDir: Digital Health Twin/backend
-    buildCommand: pip install -r requirements.txt && python -c "from app import app, db; app.app_context().push(); db.create_all()"
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
-    dockerfilePath: null
     envVars:
       - key: FLASK_ENV
         value: production
@@ -31,7 +30,6 @@ services:
     rootDir: AshaWorker_dashboard
     buildCommand: npm install && npm run build
     staticPublishPath: dist
-    dockerfilePath: null
     envVars:
       - key: VITE_API_URL
         value: https://health-monitoring-api.onrender.com
@@ -45,7 +43,6 @@ services:
     rootDir: HealthWorker_dashboard
     buildCommand: npm install && npm run build
     staticPublishPath: dist
-    dockerfilePath: null
     envVars:
       - key: VITE_API_URL
         value: https://health-monitoring-api.onrender.com
@@ -58,7 +55,6 @@ services:
     env: static
     rootDir: Login pg
     staticPublishPath: ./
-    dockerfilePath: null
     envVars:
       - key: VITE_API_URL
         value: https://health-monitoring-api.onrender.com
