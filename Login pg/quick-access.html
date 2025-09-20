@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Dashboard Access</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 40px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 { color: #333; margin-bottom: 30px; }
+        .dashboard-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin: 15px 0;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .dashboard-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+        .asha-btn { background: #28a745; }
+        .asha-btn:hover { background: #1e7e34; }
+        .health-btn { background: #17a2b8; }
+        .health-btn:hover { background: #117a8b; }
+        .login-btn { background: #6c757d; }
+        .login-btn:hover { background: #545b62; }
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Quick Dashboard Access</h1>
+        
+        <div class="note">
+            <strong>Development Mode:</strong> Authentication is temporarily relaxed for testing.
+        </div>
+        
+        <button class="dashboard-btn asha-btn" onclick="goToAshaWithAuth()">
+            📱 ASHA Worker Dashboard
+        </button>
+        
+        <button class="dashboard-btn health-btn" onclick="goToHealthWithAuth()">
+            🏥 Health Worker Dashboard
+        </button>
+        
+        <button class="dashboard-btn asha-btn" onclick="goToAshaDirect()">
+            🔓 ASHA Dashboard (Direct - No Auth)
+        </button>
+        
+        <button class="dashboard-btn health-btn" onclick="goToHealthDirect()">
+            🔓 Health Dashboard (Direct - No Auth)
+        </button>
+        
+        <a href="/" class="dashboard-btn login-btn">
+            🔐 Back to Login Page
+        </a>
+    </div>
+
+    <script>
+        function goToAshaWithAuth() {
+            console.log('Setting ASHA authentication data...');
+            
+            // Set proper authentication data
+            const ashaUser = {
+                name: 'Priya Sharma',
+                role: 'ASHA',
+                username: 'asha001',
+                worker_id: 'AS001'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(ashaUser));
+            localStorage.setItem('isAuthenticated', 'true');
+            
+            console.log('Authentication data set, redirecting...');
+            window.location.href = 'http://localhost:5174';
+        }
+
+        function goToHealthWithAuth() {
+            console.log('Setting Health Worker authentication data...');
+            
+            // Set proper authentication data
+            const healthUser = {
+                name: 'Dr. Rajesh Kumar',
+                role: 'PHC',
+                username: 'health001',
+                worker_id: 'PHC001'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(healthUser));
+            localStorage.setItem('isAuthenticated', 'true');
+            
+            console.log('Authentication data set, redirecting...');
+            window.location.href = 'http://localhost:5173';
+        }
+
+        function goToAshaDirect() {
+            console.log('Going to ASHA dashboard directly (no auth)...');
+            window.location.href = 'http://localhost:5174';
+        }
+
+        function goToHealthDirect() {
+            console.log('Going to Health dashboard directly (no auth)...');
+            window.location.href = 'http://localhost:5173';
+        }
+
+        // Clear any existing authentication on page load
+        window.onload = function() {
+            console.log('Quick access page loaded');
+        };
+    </script>
+</body>
+</html>

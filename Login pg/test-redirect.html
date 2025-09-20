@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Redirect</title>
+</head>
+<body>
+    <h1>Test Redirect Page</h1>
+    <button onclick="testRedirect()">Test Redirect to ASHA Dashboard</button>
+    <button onclick="testLocalStorage()">Test LocalStorage</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+    
+    <div id="output"></div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += `<p>${new Date().toLocaleTimeString()}: ${message}</p>`;
+            console.log(message);
+        }
+
+        function testRedirect() {
+            log('Testing redirect to ASHA dashboard...');
+            log('Current URL: ' + window.location.href);
+            
+            // Set test data in localStorage
+            localStorage.setItem('user', JSON.stringify({
+                name: 'Priya Sharma',
+                role: 'ASHA',
+                username: 'asha001',
+                worker_id: 'AS001'
+            }));
+            localStorage.setItem('isAuthenticated', 'true');
+            
+            log('Set localStorage data');
+            log('User: ' + localStorage.getItem('user'));
+            log('Auth: ' + localStorage.getItem('isAuthenticated'));
+            
+            // Try redirect
+            log('Attempting redirect to http://localhost:5174');
+            window.location.href = 'http://localhost:5174';
+        }
+
+        function testLocalStorage() {
+            log('Current localStorage:');
+            log('User: ' + localStorage.getItem('user'));
+            log('Auth: ' + localStorage.getItem('isAuthenticated'));
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            log('Cleared localStorage');
+        }
+
+        // Page load
+        log('Test page loaded');
+    </script>
+</body>
+</html>

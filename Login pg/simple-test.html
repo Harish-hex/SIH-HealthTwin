@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Login Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 50px; background: #f0f0f0; }
+    .login-container { background: white; padding: 30px; border-radius: 10px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+    .login-button { width: 100%; padding: 12px; background: linear-gradient(135deg, #0d47a1, #1976d2); color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; margin: 20px 0; }
+    .login-button:hover { background: linear-gradient(135deg, #1565c0, #1e88e5); }
+    .result { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Simple Login Test</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" value="asha001">
+      <input type="password" id="password" placeholder="Password" value="asha123">
+      <button type="submit" class="login-button">Test Login</button>
+    </form>
+    <div id="result" class="result" style="display: none;"></div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      console.log('Form submitted!');
+      
+      const resultDiv = document.getElementById('result');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = 'Testing login...';
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      try {
+        console.log('Sending request...');
+        const response = await fetch('http://127.0.0.1:5001/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        
+        console.log('Response received:', response.status);
+        const data = await response.json();
+        console.log('Data:', data);
+        
+        if (data.success) {
+          resultDiv.innerHTML = `✅ Success! Welcome ${data.user.name}<br>Dashboard: ${data.dashboard_url}`;
+          // Test redirect
+          setTimeout(() => {
+            window.location.href = data.dashboard_url;
+          }, 2000);
+        } else {
+          resultDiv.innerHTML = `❌ Error: ${data.message}`;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        resultDiv.innerHTML = `❌ Network Error: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
+

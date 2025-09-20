@@ -1,0 +1,62 @@
+services:
+  # Backend API
+  - type: web
+    name: health-monitoring-api
+    env: python
+    plan: starter
+    buildCommand: cd "Digital Health Twin/backend" && pip install -r requirements.txt
+    startCommand: cd "Digital Health Twin/backend" && gunicorn --bind 0.0.0.0:$PORT app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: health-monitoring-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://asha-worker-dashboard.onrender.com,https://health-worker-dashboard.onrender.com,https://health-monitoring-login.onrender.com
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 10000
+
+  # ASHA Dashboard
+  - type: web
+    name: asha-worker-dashboard
+    env: static
+    buildCommand: cd AshaWorker_dashboard && npm install && npm run build
+    staticPublishPath: AshaWorker_dashboard/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://health-monitoring-api.onrender.com
+      - key: VITE_LOGIN_URL
+        value: https://health-monitoring-login.onrender.com
+
+  # Health Dashboard
+  - type: web
+    name: health-worker-dashboard
+    env: static
+    buildCommand: cd HealthWorker_dashboard && npm install && npm run build
+    staticPublishPath: HealthWorker_dashboard/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://health-monitoring-api.onrender.com
+      - key: VITE_LOGIN_URL
+        value: https://health-monitoring-login.onrender.com
+
+  # Login Page
+  - type: web
+    name: health-monitoring-login
+    env: static
+    staticPublishPath: Login pg
+    envVars:
+      - key: VITE_API_URL
+        value: https://health-monitoring-api.onrender.com
+
+databases:
+  - name: health-monitoring-db
+    plan: starter
+    databaseName: health_monitoring
+    user: health_user

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Login Page</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo">
+          <i class="fas fa-heartbeat"></i>
+        </div>
+        <h1>Debug Login</h1>
+        <p>Testing redirect functionality</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="input-group">
+          <i class="fas fa-user"></i>
+          <input type="text" id="username" placeholder="Username" required>
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="password" placeholder="Password" required>
+          <i class="fas fa-eye" id="togglePassword"></i>
+        </div>
+
+        <button type="submit" class="login-button">Log In</button>
+      </form>
+
+      <div class="demo-credentials">
+        <h3>Demo Credentials:</h3>
+        <p><strong>ASHA Worker:</strong> asha001 / asha123</p>
+        <p><strong>Health Worker:</strong> health001 / health123</p>
+      </div>
+
+      <div id="debug-info" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-family: monospace; font-size: 12px;">
+        <h4>Debug Info:</h4>
+        <div id="debug-log"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function debugLog(message) {
+      const debugLog = document.getElementById('debug-log');
+      const timestamp = new Date().toLocaleTimeString();
+      debugLog.innerHTML += `[${timestamp}] ${message}<br>`;
+      console.log(`[DEBUG] ${message}`);
+    }
+
+    // Toggle password visibility
+    const passwordInput = document.getElementById("password");
+    const togglePassword = document.getElementById("togglePassword");
+
+    togglePassword.addEventListener("click", function () {
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      this.classList.toggle("fa-eye");
+      this.classList.toggle("fa-eye-slash");
+    });
+
+    // Login functionality
+    const form = document.querySelector('form');
+    const usernameInput = document.getElementById('username');
+    // passwordInput already declared above
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      debugLog('Form submitted!');
+      
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+      
+      debugLog(`Username: ${username}, Password: ${password}`);
+      
+      if (!username || !password) {
+        debugLog('Missing credentials');
+        alert('Please enter both username and password');
+        return;
+      }
+
+      const submitButton = document.querySelector('.login-button');
+      submitButton.textContent = 'Logging in...';
+      submitButton.disabled = true;
+
+      try {
+        debugLog('Sending request to backend...');
+        const response = await fetch('http://127.0.0.1:5001/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: username,
+            password: password
+          })
+        });
+
+        debugLog(`Response status: ${response.status}`);
+        const data = await response.json();
+        debugLog(`Response data: ${JSON.stringify(data, null, 2)}`);
+
+        if (data.success) {
+          debugLog('Login successful!');
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('isAuthenticated', 'true');
+          
+          debugLog(`Stored user: ${localStorage.getItem('user')}`);
+          debugLog(`Stored auth: ${localStorage.getItem('isAuthenticated')}`);
+          debugLog(`About to redirect to: ${data.dashboard_url}`);
+          
+          submitButton.textContent = 'Success! Redirecting...';
+          submitButton.style.background = 'linear-gradient(135deg, #4caf50, #66bb6a)';
+          
+          // Test different redirect methods
+          debugLog('Testing redirect methods...');
+          
+          // Method 1: Direct assignment
+          debugLog('Method 1: window.location.href');
+          window.location.href = data.dashboard_url;
+          
+          // Method 2: setTimeout with assignment
+          setTimeout(() => {
+            debugLog('Method 2: setTimeout redirect');
+            window.location.href = data.dashboard_url;
+          }, 2000);
+          
+          // Method 3: window.open
+          setTimeout(() => {
+            debugLog('Method 3: window.open');
+            window.open(data.dashboard_url, '_self');
+          }, 4000);
+          
+        } else {
+          debugLog(`Login failed: ${data.message}`);
+          alert(data.message || 'Login failed. Please check your credentials.');
+          submitButton.textContent = 'Log In';
+          submitButton.disabled = false;
+        }
+      } catch (error) {
+        debugLog(`Login error: ${error.message}`);
+        console.error('Login error:', error);
+        alert('Login failed. Please try again.');
+        submitButton.textContent = 'Log In';
+        submitButton.disabled = false;
+      }
+    });
+
+    // Page load debug
+    debugLog('Page loaded, setting up demo credentials...');
+    debugLog(`Login button found: ${document.querySelector('.login-button') ? 'Yes' : 'No'}`);
+  </script>
+</body>
+</html>

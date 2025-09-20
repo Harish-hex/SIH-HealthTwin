@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalStorage Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>LocalStorage Authentication Test</h1>
+    
+    <div class="section">
+        <h3>Test 1: Manual Storage Test</h3>
+        <button onclick="setTestData()">Set Test Data</button>
+        <button onclick="checkData()">Check Data</button>
+        <button onclick="clearData()">Clear Data</button>
+        <div id="manual-test" class="log"></div>
+    </div>
+
+    <div class="section">
+        <h3>Test 2: Login and Storage Test</h3>
+        <button onclick="doLoginAndStore()">Login & Store Data</button>
+        <button onclick="checkStoredLoginData()">Check Login Data</button>
+        <div id="login-test" class="log"></div>
+    </div>
+
+    <div class="section">
+        <h3>Test 3: Go to Dashboard with Stored Data</h3>
+        <button onclick="goToDashboardWithData()">Set Data & Go to Dashboard</button>
+        <div id="dashboard-test" class="log"></div>
+    </div>
+
+    <script>
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            element.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function setTestData() {
+            log('manual-test', 'Setting test data...');
+            
+            const userData = {
+                name: 'Priya Sharma',
+                role: 'ASHA',
+                username: 'asha001',
+                worker_id: 'AS001'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(userData));
+            localStorage.setItem('isAuthenticated', 'true');
+            
+            log('manual-test', `Set user: ${JSON.stringify(userData)}`, 'success');
+            log('manual-test', `Set isAuthenticated: true`, 'success');
+        }
+
+        function checkData() {
+            log('manual-test', 'Checking stored data...');
+            
+            const user = localStorage.getItem('user');
+            const auth = localStorage.getItem('isAuthenticated');
+            
+            log('manual-test', `Raw user data: ${user}`);
+            log('manual-test', `Raw auth data: ${auth}`);
+            
+            if (user && auth === 'true') {
+                try {
+                    const userData = JSON.parse(user);
+                    log('manual-test', `Parsed user: ${JSON.stringify(userData, null, 2)}`, 'success');
+                    log('manual-test', `User role: ${userData.role}`, userData.role === 'ASHA' ? 'success' : 'error');
+                } catch (error) {
+                    log('manual-test', `Parse error: ${error.message}`, 'error');
+                }
+            } else {
+                log('manual-test', 'No valid authentication data found', 'error');
+            }
+        }
+
+        function clearData() {
+            localStorage.clear();
+            log('manual-test', 'Cleared all localStorage data', 'success');
+        }
+
+        async function doLoginAndStore() {
+            log('login-test', 'Performing actual login...');
+            
+            try {
+                const response = await fetch('http://127.0.0.1:5001/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'asha001',
+                        password: 'asha123'
+                    })
+                });
+
+                const data = await response.json();
+                log('login-test', `Backend response: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.success) {
+                    // Store exactly as the login page does
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('isAuthenticated', 'true');
+                    
+                    log('login-test', 'Stored login data successfully', 'success');
+                    log('login-test', `Stored user: ${JSON.stringify(data.user)}`, 'success');
+                    
+                    // Immediately check what was stored
+                    const storedUser = localStorage.getItem('user');
+                    const storedAuth = localStorage.getItem('isAuthenticated');
+                    log('login-test', `Verification - User: ${storedUser}`, 'success');
+                    log('login-test', `Verification - Auth: ${storedAuth}`, 'success');
+                    
+                } else {
+                    log('login-test', `Login failed: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log('login-test', `Login error: ${error.message}`, 'error');
+            }
+        }
+
+        function checkStoredLoginData() {
+            log('login-test', 'Checking login data...');
+            
+            const user = localStorage.getItem('user');
+            const auth = localStorage.getItem('isAuthenticated');
+            
+            log('login-test', `Current user: ${user}`);
+            log('login-test', `Current auth: ${auth}`);
+            
+            if (user && auth === 'true') {
+                try {
+                    const userData = JSON.parse(user);
+                    log('login-test', `Role check: ${userData.role} === 'ASHA' = ${userData.role === 'ASHA'}`, userData.role === 'ASHA' ? 'success' : 'error');
+                } catch (error) {
+                    log('login-test', `Parse error: ${error.message}`, 'error');
+                }
+            } else {
+                log('login-test', 'No valid data found', 'error');
+            }
+        }
+
+        function goToDashboardWithData() {
+            log('dashboard-test', 'Setting data and going to dashboard...');
+            
+            // Set the exact data
+            const userData = {
+                name: 'Priya Sharma',
+                role: 'ASHA',
+                username: 'asha001',
+                worker_id: 'AS001'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(userData));
+            localStorage.setItem('isAuthenticated', 'true');
+            
+            log('dashboard-test', 'Data set, waiting 1 second then redirecting...', 'success');
+            
+            setTimeout(() => {
+                log('dashboard-test', 'Redirecting to dashboard...');
+                window.location.href = 'http://localhost:5174';
+            }, 1000);
+        }
+
+        // Page load check
+        window.onload = function() {
+            log('manual-test', 'Page loaded. Current localStorage contents:');
+            checkData();
+        };
+    </script>
+</body>
+</html>

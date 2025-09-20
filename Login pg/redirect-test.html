@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirect Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 50px; text-align: center; }
+    button { padding: 15px 30px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+    .info { margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Redirect Test</h1>
+  
+  <div class="info">
+    <p>This page will test if redirects work properly.</p>
+    <p>Click the button below to test redirect to ASHA dashboard.</p>
+  </div>
+  
+  <button onclick="testRedirect()">Test Redirect to ASHA Dashboard</button>
+  <button onclick="testRedirectWithDelay()">Test Redirect with 2s Delay</button>
+  <button onclick="testRedirectWithStorage()">Test Login + Redirect</button>
+  
+  <div id="status" class="info" style="display: none;"></div>
+
+  <script>
+    function testRedirect() {
+      document.getElementById('status').style.display = 'block';
+      document.getElementById('status').innerHTML = 'Redirecting immediately...';
+      console.log('Redirecting to: http://localhost:5174');
+      window.location.href = 'http://localhost:5174';
+    }
+    
+    function testRedirectWithDelay() {
+      document.getElementById('status').style.display = 'block';
+      document.getElementById('status').innerHTML = 'Redirecting in 2 seconds...';
+      console.log('Will redirect to: http://localhost:5174 in 2 seconds');
+      setTimeout(() => {
+        console.log('Redirecting now...');
+        window.location.href = 'http://localhost:5174';
+      }, 2000);
+    }
+    
+    async function testRedirectWithStorage() {
+      document.getElementById('status').style.display = 'block';
+      document.getElementById('status').innerHTML = 'Testing login + redirect...';
+      
+      try {
+        // Simulate login
+        const response = await fetch('http://127.0.0.1:5001/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: 'asha001', password: 'asha123' })
+        });
+        
+        const data = await response.json();
+        console.log('Login response:', data);
+        
+        if (data.success) {
+          // Store in localStorage
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('isAuthenticated', 'true');
+          
+          document.getElementById('status').innerHTML = 'Login successful! Redirecting in 1 second...';
+          console.log('Stored in localStorage, redirecting to:', data.dashboard_url);
+          
+          setTimeout(() => {
+            window.location.href = data.dashboard_url;
+          }, 1000);
+        } else {
+          document.getElementById('status').innerHTML = 'Login failed: ' + data.message;
+        }
+      } catch (error) {
+        document.getElementById('status').innerHTML = 'Error: ' + error.message;
+        console.error('Error:', error);
+      }
+    }
+  </script>
+</body>
+</html>
+

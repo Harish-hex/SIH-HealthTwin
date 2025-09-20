@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Login Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 5px; }
+        .log { background: #f0f0f0; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Simple Login Test</h1>
+    
+    <div class="test-section">
+        <h3>Step 1: Test Backend Login</h3>
+        <button onclick="testLogin()">Test ASHA Login</button>
+        <div id="login-result" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Step 2: Set LocalStorage and Test Dashboard Access</h3>
+        <button onclick="setStorageAndRedirect()">Set Storage & Go to Dashboard</button>
+        <button onclick="checkStorage()">Check Current Storage</button>
+        <button onclick="clearStorage()">Clear Storage</button>
+        <div id="storage-result" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Step 3: Direct Dashboard Test</h3>
+        <button onclick="goToDashboard()">Go to ASHA Dashboard (No Auth)</button>
+        <button onclick="goToHealth()">Go to Health Dashboard</button>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.innerHTML += `[${timestamp}] ${message}<br>`;
+            console.log(message);
+        }
+
+        async function testLogin() {
+            log('login-result', 'Testing backend login...');
+            
+            try {
+                const response = await fetch('http://127.0.0.1:5001/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'asha001',
+                        password: 'asha123'
+                    })
+                });
+
+                const data = await response.json();
+                log('login-result', `Response: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.success) {
+                    log('login-result', '✅ Backend login successful!');
+                    return data;
+                } else {
+                    log('login-result', '❌ Backend login failed!');
+                }
+            } catch (error) {
+                log('login-result', `❌ Error: ${error.message}`);
+            }
+        }
+
+        function setStorageAndRedirect() {
+            log('storage-result', 'Setting localStorage...');
+            
+            // Set the exact data that should be set after login
+            const userData = {
+                name: 'Priya Sharma',
+                role: 'ASHA',
+                username: 'asha001',
+                worker_id: 'AS001'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(userData));
+            localStorage.setItem('isAuthenticated', 'true');
+            
+            log('storage-result', `Set user: ${JSON.stringify(userData)}`);
+            log('storage-result', `Set isAuthenticated: true`);
+            
+            // Wait a moment then redirect
+            setTimeout(() => {
+                log('storage-result', 'Redirecting to ASHA dashboard...');
+                window.location.href = 'http://localhost:5174';
+            }, 1000);
+        }
+
+        function checkStorage() {
+            log('storage-result', 'Current localStorage:');
+            log('storage-result', `user: ${localStorage.getItem('user')}`);
+            log('storage-result', `isAuthenticated: ${localStorage.getItem('isAuthenticated')}`);
+            log('storage-result', `All keys: ${Object.keys(localStorage).join(', ')}`);
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            log('storage-result', 'Cleared localStorage');
+        }
+
+        function goToDashboard() {
+            log('storage-result', 'Going to ASHA dashboard without auth check...');
+            window.open('http://localhost:5174', '_blank');
+        }
+
+        function goToHealth() {
+            log('storage-result', 'Going to Health dashboard...');
+            window.open('http://localhost:5173', '_blank');
+        }
+
+        // Page load
+        log('storage-result', 'Page loaded. Current localStorage:');
+        checkStorage();
+    </script>
+</body>
+</html>

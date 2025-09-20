@@ -1,0 +1,55 @@
+services:
+  # Backend API Service
+  - type: web
+    name: health-monitoring-api
+    env: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: health-monitoring-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://health-monitoring-asha.onrender.com,https://health-monitoring-dashboard.onrender.com,https://health-monitoring-login.onrender.com
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 10000
+
+  # ASHA Worker Dashboard
+  - type: web
+    name: health-monitoring-asha
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://health-monitoring-api.onrender.com
+
+  # Health Worker Dashboard
+  - type: web
+    name: health-monitoring-dashboard
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://health-monitoring-api.onrender.com
+
+  # Login Page
+  - type: web
+    name: health-monitoring-login
+    env: static
+    staticPublishPath: ./
+
+databases:
+  - name: health-monitoring-db
+    plan: starter
+    databaseName: health_monitoring
+    user: health_user

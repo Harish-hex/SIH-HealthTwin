@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: health_monitoring_db
+    environment:
+      - POSTGRES_DB=health_monitoring
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./Digital Health Twin/backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Backend API Service
+  api:
+    build: 
+      context: ./Digital Health Twin/backend
+      dockerfile: Dockerfile
+    container_name: health_monitoring_api
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://postgres:password@db:5432/health_monitoring
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:8081,http://localhost:80,http://localhost:443
+      - SECRET_KEY=your-super-secret-key-change-this-in-production
+      - HOST=0.0.0.0
+      - PORT=5000
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./Digital Health Twin/backend/model:/app/model
+      - ./Digital Health Twin/backend/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ASHA Worker Dashboard Frontend
+  asha-dashboard:
+    build:
+      context: ./AshaWorker_dashboard
+      dockerfile: Dockerfile
+    container_name: asha_dashboard
+    ports:
+      - "3001:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Health Worker Dashboard Frontend (if exists)
+  health-dashboard:
+    build:
+      context: ./HealthWorker_dashboard
+      dockerfile: Dockerfile
+    container_name: health_dashboard
+    ports:
+      - "3002:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Login Page (if needed)
+  login-page:
+    build:
+      context: ./Login pg
+      dockerfile: Dockerfile
+    container_name: login_page
+    ports:
+      - "3003:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: health_monitoring_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - api
+      - asha-dashboard
+      - health-dashboard
+    restart: unless-stopped
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: health_monitoring_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  default:
+    driver: bridge

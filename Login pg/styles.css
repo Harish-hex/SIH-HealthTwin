@@ -1,0 +1,125 @@
+/* General background */
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom, #a8e0ff, #0093e9);
+}
+
+/* Login box */
+.login-container {
+  background: #f9fcff;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  width: 350px;
+  text-align: left;
+}
+
+/* Heading */
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #0d47a1;
+  font-size: 24px;
+}
+
+/* Labels */
+label {
+  display: block;
+  margin: 12px 0 6px;
+  color: #0d47a1;
+  font-weight: bold;
+}
+
+/* Input fields */
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 40px 12px 12px; /* padding-right for icon */
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+/* Password wrapper */
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Eye icon */
+.password-wrapper .toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #000; /* professional black */
+}
+
+/* Login button */
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #0d47a1, #1976d2);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 20px 0 15px 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
+}
+
+.login-button:hover {
+  background: linear-gradient(135deg, #1565c0, #1e88e5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13, 71, 161, 0.4);
+}
+
+.login-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(13, 71, 161, 0.3);
+}
+
+.login-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.login-button:disabled:hover {
+  background: #ccc;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Forgot password */
+.forgot-password {
+  display: block;
+  margin: 8px 0 15px;
+  color: #0d47a1;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+/* Signup text */
+.signup-text {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 15px;
+}
+.signup-text a {
+  color: #0d47a1;
+  text-decoration: underline;
+  font-weight: bold;
+}

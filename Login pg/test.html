@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+    button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Login System Test</h1>
+  
+  <div class="test-section">
+    <h3>Test 1: Backend Connection</h3>
+    <button onclick="testBackend()">Test Backend</button>
+    <div id="backend-result" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h3>Test 2: Login Functionality</h3>
+    <button onclick="testLogin()">Test Login (asha001/asha123)</button>
+    <div id="login-result" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h3>Test 3: Dashboard Access</h3>
+    <button onclick="testDashboard()">Test Dashboard Access</button>
+    <div id="dashboard-result" class="result"></div>
+  </div>
+
+  <script>
+    async function testBackend() {
+      const resultDiv = document.getElementById('backend-result');
+      try {
+        const response = await fetch('http://127.0.0.1:5001/');
+        const data = await response.json();
+        resultDiv.innerHTML = `<strong>Success:</strong> Backend is running<br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+      }
+    }
+    
+    async function testLogin() {
+      const resultDiv = document.getElementById('login-result');
+      try {
+        const response = await fetch('http://127.0.0.1:5001/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: 'asha001', password: 'asha123' })
+        });
+        const data = await response.json();
+        resultDiv.innerHTML = `<strong>Success:</strong> Login works<br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+      }
+    }
+    
+    async function testDashboard() {
+      const resultDiv = document.getElementById('dashboard-result');
+      try {
+        const response = await fetch('http://localhost:5174');
+        if (response.ok) {
+          resultDiv.innerHTML = `<strong>Success:</strong> ASHA Dashboard is accessible`;
+        } else {
+          resultDiv.innerHTML = `<strong>Error:</strong> Dashboard returned status ${response.status}`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
+

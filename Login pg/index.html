@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Login Page</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Font Awesome for professional eye icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="login-container">
+    <h2>Log in</h2>
+    <form>
+      <label for="username">User name</label>
+      <input type="text" id="username" placeholder="Enter ID">
+
+      <label for="password">Password</label>
+      <div class="password-wrapper">
+        <input type="password" id="password" placeholder="Enter Passcode">
+        <i class="fa-solid fa-eye-slash toggle-password" id="togglePassword"></i>
+      </div>
+
+      <button type="submit" class="login-button">Log In</button>
+
+      <a href="#" class="forgot-password">Forget Password?</a>
+      <hr>
+      <p class="signup-text">New User? <a href="#">Sign Up</a></p>
+    </form>
+  </div>
+
+  <script>
+    // Toggle password visibility
+    const passwordInput = document.getElementById("password");
+    const togglePassword = document.getElementById("togglePassword");
+
+    togglePassword.addEventListener("click", function () {
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+
+      // Switch between eye and eye-slash icons
+      this.classList.toggle("fa-eye");
+      this.classList.toggle("fa-eye-slash");
+    });
+
+    // Login functionality
+    const form = document.querySelector('form');
+    const usernameInput = document.getElementById('username');
+    // passwordInput already declared above
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      console.log('Form submitted!'); // Debug log
+      
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+      
+      console.log('Username:', username, 'Password:', password); // Debug log
+      
+      if (!username || !password) {
+        alert('Please enter both username and password');
+        return;
+      }
+
+      // Show loading state
+      const submitButton = document.querySelector('.login-button');
+      const originalText = submitButton.textContent;
+      submitButton.textContent = 'Logging in...';
+      submitButton.disabled = true;
+
+      try {
+        console.log('Sending request to backend...'); // Debug log
+        console.log('Backend URL: http://127.0.0.1:5000/auth/login'); // Debug log
+        
+        const response = await fetch('http://127.0.0.1:5000/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          mode: 'cors',
+          body: JSON.stringify({
+            username: username,
+            password: password
+          })
+        });
+
+        console.log('Response status:', response.status); // Debug log
+        const data = await response.json();
+        console.log('Response data:', data); // Debug log
+
+        if (data.success) {
+          // Store user info in localStorage
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('isAuthenticated', 'true');
+          
+          console.log('Login successful! Redirecting to:', data.dashboard_url); // Debug log
+          
+          // Show success message and redirect
+          submitButton.textContent = 'Success! Redirecting...';
+          submitButton.style.background = 'linear-gradient(135deg, #4caf50, #66bb6a)';
+          
+          // Redirect after a short delay to show success message
+          setTimeout(() => {
+            console.log('About to redirect to:', data.dashboard_url);
+            console.log('Current location:', window.location.href);
+            window.location.href = data.dashboard_url;
+            console.log('Redirect command executed');
+          }, 1000);
+        } else {
+          alert(data.message || 'Login failed. Please check your credentials.');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+        
+        let errorMessage = 'Login failed. ';
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          errorMessage += 'Cannot connect to backend server. Please check if the server is running on port 5000.';
+        } else if (error.name === 'NetworkError') {
+          errorMessage += 'Network error. Please check your internet connection and server status.';
+        } else {
+          errorMessage += 'Error: ' + error.message;
+        }
+        
+        alert(errorMessage);
+      } finally {
+        // Reset button state
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+      }
+    });
+
+    // Demo credentials info
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Page loaded, setting up demo credentials...'); // Debug log
+      
+      const demoInfo = document.createElement('div');
+      demoInfo.innerHTML = `
+        <div style="margin-top: 20px; padding: 15px; background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px; font-size: 14px;">
+          <h4 style="margin: 0 0 10px 0; color: #0066cc;">Demo Credentials:</h4>
+          <p style="margin: 5px 0;"><strong>ASHA Workers:</strong></p>
+          <p style="margin: 2px 0; font-family: monospace;">asha001 / asha123</p>
+          <p style="margin: 2px 0; font-family: monospace;">asha002 / asha456</p>
+          <p style="margin: 5px 0;"><strong>Health Workers:</strong></p>
+          <p style="margin: 2px 0; font-family: monospace;">health001 / health123</p>
+          <p style="margin: 2px 0; font-family: monospace;">health002 / health456</p>
+          <p style="margin: 5px 0;"><strong>Admin:</strong></p>
+          <p style="margin: 2px 0; font-family: monospace;">admin / admin123</p>
+        </div>
+      `;
+      document.querySelector('.login-container').appendChild(demoInfo);
+      
+      // Test button click
+      const loginButton = document.querySelector('.login-button');
+      if (loginButton) {
+        console.log('Login button found:', loginButton); // Debug log
+        loginButton.addEventListener('click', function() {
+          console.log('Login button clicked!'); // Debug log
+        });
+      } else {
+        console.error('Login button not found!'); // Debug log
+      }
+    });
+  </script>
+</body>
+</html>

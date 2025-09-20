@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .debug-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+    button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Debug Login System</h1>
+  
+  <div class="debug-section">
+    <h3>Test Login and Check localStorage</h3>
+    <button onclick="testLoginAndStorage()">Test Login</button>
+    <div id="result" class="result"></div>
+  </div>
+  
+  <div class="debug-section">
+    <h3>Check localStorage</h3>
+    <button onclick="checkStorage()">Check Storage</button>
+    <div id="storage-result" class="result"></div>
+  </div>
+  
+  <div class="debug-section">
+    <h3>Test Dashboard Access</h3>
+    <button onclick="testDashboardAccess()">Test Dashboard</button>
+    <div id="dashboard-result" class="result"></div>
+  </div>
+
+  <script>
+    async function testLoginAndStorage() {
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = 'Testing login...';
+      
+      try {
+        const response = await fetch('http://127.0.0.1:5001/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: 'asha001', password: 'asha123' })
+        });
+        
+        const data = await response.json();
+        console.log('Login response:', data);
+        
+        if (data.success) {
+          // Store in localStorage
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('isAuthenticated', 'true');
+          
+          resultDiv.innerHTML = `
+            <strong>✅ Login Successful!</strong><br>
+            User: ${data.user.name}<br>
+            Role: ${data.user.role}<br>
+            Dashboard: ${data.dashboard_url}<br>
+            <br>
+            <strong>localStorage after login:</strong><br>
+            user: ${localStorage.getItem('user')}<br>
+            isAuthenticated: ${localStorage.getItem('isAuthenticated')}
+          `;
+          
+          // Test redirect after 2 seconds
+          setTimeout(() => {
+            console.log('Redirecting to:', data.dashboard_url);
+            window.location.href = data.dashboard_url;
+          }, 2000);
+        } else {
+          resultDiv.innerHTML = `❌ Login failed: ${data.message}`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `❌ Error: ${error.message}`;
+      }
+    }
+    
+    function checkStorage() {
+      const storageDiv = document.getElementById('storage-result');
+      const user = localStorage.getItem('user');
+      const auth = localStorage.getItem('isAuthenticated');
+      
+      storageDiv.innerHTML = `
+        <strong>Current localStorage:</strong><br>
+        user: ${user || 'null'}<br>
+        isAuthenticated: ${auth || 'null'}<br>
+        <br>
+        <strong>Parsed user data:</strong><br>
+        ${user ? JSON.stringify(JSON.parse(user), null, 2) : 'No user data'}
+      `;
+    }
+    
+    async function testDashboardAccess() {
+      const dashboardDiv = document.getElementById('dashboard-result');
+      dashboardDiv.innerHTML = 'Testing dashboard access...';
+      
+      try {
+        const response = await fetch('http://localhost:5174');
+        if (response.ok) {
+          dashboardDiv.innerHTML = '✅ ASHA Dashboard is accessible';
+        } else {
+          dashboardDiv.innerHTML = `❌ Dashboard returned status: ${response.status}`;
+        }
+      } catch (error) {
+        dashboardDiv.innerHTML = `❌ Error accessing dashboard: ${error.message}`;
+      }
+    }
+    
+    // Check storage on page load
+    window.addEventListener('load', checkStorage);
+  </script>
+</body>
+</html>
+
